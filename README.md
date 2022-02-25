@@ -9,6 +9,7 @@
 - 可将所有笔记（文件）按原格式下载到本地
 - 由于「笔记」类型文件下载后默认为 Xml 格式，不是正常笔记内容，**默认将其转换为 Markdown 格式**
 - 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
+- 本代码使用pywin32增加了文件时间的更新，更加有利于joplin这类管理
 
 ## 使用步骤 <!--用法 Usage-->
 
@@ -28,7 +29,7 @@ git --version
 
 ```shell
 pwd
-git clone https://github.com/DeppWang/youdaonote-pull.git
+git clone https://github.com/changtianyu/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
@@ -37,22 +38,18 @@ cd youdaonote-pull
 - 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
 
 ```shell
-python3 --version  # macOS/Linux
+
 python --version   # Windows
 ```
 
 - 安装依赖包
 
-```shell
-# macOS
-sudo easy_install pip3      # 安装 Python3 Package Installer
-sudo pip3 install requests     #  安装 requests
-sudo pip3 install markdownify  #  安装 markdownify，用于 html 转化为 md
-```
+
 ```shell
 # Windows
 pip install requests  
 pip install markdownify
+pip install pywin32
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```

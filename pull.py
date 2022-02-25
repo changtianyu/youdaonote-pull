@@ -12,6 +12,10 @@ from urllib.parse import urlparse
 import re
 import logging
 from markdownify import markdownify as md
+from win32file import CreateFile, SetFileTime, GetFileTime, CloseHandle
+from win32file import GENERIC_READ, GENERIC_WRITE, OPEN_EXISTING
+from pywintypes import Time # 可以忽视这个 Time 报错（运行程序还是没问题的）
+import time
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -342,6 +346,8 @@ class YoudaoNoteSession(requests.Session):
             except Exception as error:
                 print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
                 print('错误提示：%s' % format(error))
+        
+        self.modifyFileTime(local_file_path,file_entry['createTimeForSort'],file_entry['modifyTimeForSort'],file_entry['transactionTime'],None)
 
     def optimize_name(self, name):
         """ 避免 open() 函数失败（因为目录名错误），修改文件名 """
@@ -706,6 +712,37 @@ class YoudaoNoteSession(requests.Session):
 
     def print_download_yd_image_error(self, url) -> None:
         print('下载「%s」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常加载（验证登录才能查看）' % url)
+    
+    def modifyFileTime(self,filePath, createTime, modifyTime, accessTime, offset):
+        """
+        用来修改任意文件的相关时间属性，时间格式：YYYY-MM-DD HH:MM:SS 例如：2019-02-02 00:01:02
+        :param filePath: 文件路径名
+        :param createTime: 创建时间
+        :param modifyTime: 修改时间
+        :param accessTime: 访问时间
+        :param offset: 时间偏移的秒数,tuple格式，顺序和参数时间对应
+        """
+        try:
+            format = "%Y-%m-%d %H:%M:%S" # 时间格式
+            # cTime_t = timeOffsetAndStruct(createTime, format, offset[0])
+            # mTime_t = timeOffsetAndStruct(modifyTime, format, offset[1])
+            # aTime_t = timeOffsetAndStruct(accessTime, format, offset[2])
+        
+            fh = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, 0, None, OPEN_EXISTING, 0, 0)
+            createTimes, accessTimes, modifyTimes = GetFileTime(fh)
+        
+            # createTimes = Time(time.mktime(cTime_t))
+            # accessTimes = Time(time.mktime(aTime_t))
+            # modifyTimes = Time(time.mktime(mTime_t))
+
+            createTimes = Time(createTime)
+            accessTimes = Time(modifyTime)
+            modifyTimes = Time(accessTime)
+            SetFileTime(fh, createTimes, accessTimes, modifyTimes)
+            CloseHandle(fh)
+            return 0
+        except:
+            return 1
 
 
 def main():
@@ -741,6 +778,7 @@ def main():
     end_time = int(time.time())
     print('运行完成！耗时 %s 秒' % str(end_time - start_time))
 
+ 
 
 if __name__ == '__main__':
     main()
